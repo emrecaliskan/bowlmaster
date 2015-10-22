@@ -3,7 +3,6 @@ using System.Collections;
 
 public class Ball : MonoBehaviour {
 
-	private Vector3 launchVelocity = new Vector3(0, 0, 1500);
 	public bool inPlay = false;
 	
 	private Vector3 ballStartPos;
@@ -35,7 +34,6 @@ public class Ball : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		Debug.Log(rigidBody.velocity);
 	}
 }
 	

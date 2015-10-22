@@ -6,7 +6,7 @@ public class PinSetter : MonoBehaviour {
 
 	public int lastStandingCount = -1;
 	public Text standingDisplay;
-	private float distanceToRaise = 40f;
+	public GameObject pinSet;
 	
 	private Ball ball;
 	private float lastChangeTime;	//Keep track of when count number last got updated
@@ -22,21 +22,39 @@ public class PinSetter : MonoBehaviour {
 		standingDisplay.text = CountStanding().ToString();
 		
 		if (ballEnteredBox){
-			CheckStanding();
+			UpdateStandingCountAndSettle();
 		}
 	}
 	
 	private int CountStanding(){
 		int standing = 0;
 		foreach (Pin pin in GameObject.FindObjectsOfType<Pin>()){
-			if (pin.IsStanding())
+			if (pin.IsStanding()){
 				standing++;
+			}
 		}
 		
 		return standing;
 	}
 	
-	private void CheckStanding(){
+	public void RaisePins(){
+		foreach (Pin pin in GameObject.FindObjectsOfType<Pin>()){
+			pin.RaiseIfStanding();
+		}
+	}
+	
+	public void LowerPins(){
+		foreach (Pin pin in GameObject.FindObjectsOfType<Pin>()){
+			pin.Lower();
+		}
+	}
+	
+	public void RenewPins(){
+		//Makes new Pins
+		Instantiate (pinSet, new Vector3(0, 30, 1829), Quaternion.identity);
+	}
+	
+	private void UpdateStandingCountAndSettle(){
 		// Update the last standing count
 		// Call PinsHaveSettled, when they have
 		int currentStanding = CountStanding();
@@ -58,15 +76,6 @@ public class PinSetter : MonoBehaviour {
 		lastStandingCount = -1; // Indicates pins have settled, and ball not back in box
 		ballEnteredBox = false;
 		standingDisplay.color = Color.green;
-	}
-	
-	void OnTriggerExit(Collider collider){
-		GameObject thingLeft = collider.gameObject;
-		
-		if (thingLeft.GetComponent<Pin>()){
-			Debug.Log("CAlled");
-			Destroy(thingLeft);
-		}
 	}
 	
 	void OnTriggerEnter (Collider collider){
