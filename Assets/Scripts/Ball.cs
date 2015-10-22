@@ -3,9 +3,10 @@ using System.Collections;
 
 public class Ball : MonoBehaviour {
 
-	public Vector3 launchVelocity = new Vector3(0, 0, 1500);
-
+	private Vector3 launchVelocity = new Vector3(0, 0, 1500);
 	public bool inPlay = false;
+	
+	private Vector3 ballStartPos;
 	private Rigidbody rigidBody;
 	private AudioSource audioSource;
 
@@ -14,7 +15,7 @@ public class Ball : MonoBehaviour {
 		rigidBody = GetComponent<Rigidbody>();
 		audioSource = GetComponent<AudioSource>();
 		
-		
+		ballStartPos = transform.position;
 		rigidBody.useGravity = false;
 	}	
 	
@@ -25,9 +26,16 @@ public class Ball : MonoBehaviour {
 		audioSource.Play();
 	}
 	
+	public void Reset(){
+		inPlay = false;
+		transform.position = ballStartPos;
+		rigidBody.velocity = Vector3.zero;
+		rigidBody.angularVelocity = Vector3.zero;
+	}
+	
 	// Update is called once per frame
 	void Update () {
-	
+		Debug.Log(rigidBody.velocity);
 	}
 }
 	

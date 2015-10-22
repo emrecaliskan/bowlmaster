@@ -12,13 +12,12 @@ public class Pin : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		print(isStanding());
 	}
 	
-	public bool isStanding(){
+	public bool IsStanding(){
 		Vector3 rotationInEuler = transform.rotation.eulerAngles;
-		var xTilt = rotationInEuler.x > 180f ? Mathf.Abs(rotationInEuler.x - 360f) : rotationInEuler.x;
-		var zTilt = rotationInEuler.z > 180f ? Mathf.Abs(rotationInEuler.z - 360f) : rotationInEuler.z;
+		var xTilt = rotationInEuler.x > 180f ? Mathf.Abs(rotationInEuler.x - 270f) : rotationInEuler.x;
+		var zTilt = rotationInEuler.z > 180f ? Mathf.Abs(rotationInEuler.z) : rotationInEuler.z;
 		return (xTilt < standingThreshold) && (zTilt < standingThreshold);
 	}
 }
