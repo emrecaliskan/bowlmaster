@@ -5,7 +5,6 @@ using NUnit.Core;
 using UnityEditor;
 using UnityEngine;
 using Event = UnityEngine.Event;
-using System.Text;
 
 namespace UnityTest
 {
@@ -16,8 +15,6 @@ namespace UnityTest
         protected static GUIContent s_GUIOpenInEditor = new GUIContent("Open in editor");
         private readonly string m_ResultId;
         private readonly IList<string> m_Categories;
-		private readonly int m_maxLineLenght = 15000;
-		private UnitTestResult resultCache = null;
         
         private GUIContent m_Content;
 
@@ -44,12 +41,7 @@ namespace UnityTest
 
         public UnitTestResult result
         {
-            get 
-			{ 
-				if(resultCache == null)
-					resultCache = GetUnitTestResult(m_ResultId);
-				return resultCache; 
-			}
+            get { return GetUnitTestResult(m_ResultId); }
         }
 
         public int CompareTo(TestLine other)
@@ -108,30 +100,26 @@ namespace UnityTest
         public override string GetResultText()
         {
             var tempTest = result;
-            var sb = new StringBuilder(tempTest.Name);
+            var text = tempTest.Name;
             if (tempTest.Executed)
-				sb.AppendFormat(" ({0}s)", tempTest.Duration.ToString("##0.###"));
-			sb.AppendLine();
-
+                text += " (" + tempTest.Duration.ToString("##0.###") + "s)";
+            text += "\n";
             if (!string.IsNullOrEmpty(tempTest.Message))
             {
-				sb.AppendFormat("---\n{0}\n", tempTest.Message.Trim());
+                text += "---\n";
+                text += tempTest.Message.Trim();
             }
             if (!string.IsNullOrEmpty(tempTest.Logs))
             {
-				sb.AppendFormat("---\n{0}\n", tempTest.Logs.Trim());
+                text += "---Logs---\n";
+                text += tempTest.Logs.Trim();
             }
             if (!tempTest.IsSuccess && !string.IsNullOrEmpty(tempTest.StackTrace))
             {
                 var stackTrace = StackTraceFilter.Filter(tempTest.StackTrace).Trim();
-				sb.AppendFormat("---\n{0}\n", stackTrace);
+                text += "\n---EXCEPTION---\n" + stackTrace;
             }
-			if(sb.Length>m_maxLineLenght)
-			{
-				sb.Length = m_maxLineLenght;
-				sb.AppendFormat("...\n\n---MESSAGE TRUNCATED AT {0} CHARACTERS---", m_maxLineLenght);
-			}
-            return sb.ToString().Trim();
+            return text.Trim();
         }
 
         private void OnContextClick(Rect rect)

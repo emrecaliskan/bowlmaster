@@ -11,6 +11,5 @@ namespace UnityTest.UnitTestRunner
         void RunStarted(string suiteName, int testCount);
         void RunFinished();
         void RunFinishedException(Exception exception);
-        void AllScenesFinished();
     }
 }

@@ -49,14 +49,6 @@ namespace UnityTest.UnitTestRunner
             }
         }
 
-        public void AllScenesFinished()
-        {
-            foreach (var unitTestRunnerCallback in m_CallbackList)
-            {
-                unitTestRunnerCallback.AllScenesFinished();
-            }
-        }
-
         public void Add(ITestRunnerCallback callback)
         {
             m_CallbackList.Add(callback);

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
-using UnityEditor.Callbacks;
 
 namespace UnityTest
 {
@@ -11,7 +10,7 @@ namespace UnityTest
     public partial class UnitTestView : EditorWindow, IHasCustomMenu
     {
         private static UnitTestView s_Instance;
-        private IUnitTestEngine k_TestEngine = new NUnitTestEngine();
+        private static readonly IUnitTestEngine k_TestEngine = new NUnitTestEngine();
 
         [SerializeField] private List<UnitTestResult> m_ResultList = new List<UnitTestResult>();
         [SerializeField] private List<string> m_FoldMarkers = new List<string>();
@@ -36,7 +35,6 @@ namespace UnityTest
         private readonly GUIContent m_GUIShowDetailsBelowTests = new GUIContent("Show details below tests", "Show run details below test list");
         private readonly GUIContent m_GUIRunTestsOnNewScene = new GUIContent("Run tests on a new scene", "Run tests on a new scene");
         private readonly GUIContent m_GUIAutoSaveSceneBeforeRun = new GUIContent("Autosave scene", "The runner will automatically save the current scene changes before it starts");
-		private readonly GUIContent m_GUIReloadTestData = new GUIContent("Reload test list", "Reloads the test list. Useful with external data sources.");
         #endregion
 
         public UnitTestView()
@@ -46,26 +44,18 @@ namespace UnityTest
 
         public void OnEnable()
         {
-			titleContent = new GUIContent("Unit Tests");
+            title = "Unit Tests";
             s_Instance = this;
             m_Settings = ProjectSettingsBase.Load<UnitTestsRunnerSettings>();
             m_FilterSettings = new TestFilterSettings("UnityTest.UnitTestView");
             RefreshTests();
+            EnableBackgroundRunner(m_Settings.runOnRecompilation);
         }
-
-		[DidReloadScripts]
-		public static void OnDidReloadScripts()
-		{
-			if (s_Instance != null && s_Instance.m_Settings.runOnRecompilation) 
-			{
-				s_Instance.RunTests();
-				s_Instance.Repaint();
-			}
-		}
 
         public void OnDestroy()
         {
             s_Instance = null;
+            EnableBackgroundRunner(false);
         }
         
         public void OnGUI()
@@ -174,20 +164,15 @@ namespace UnityTest
             {
                 text = m_SelectedLines.First().GetResultText();
             }
+            EditorGUILayout.SelectableLabel(text, Styles.info);
 
-			var resultTextSize = Styles.info.CalcSize(new GUIContent(text));
-			EditorGUILayout.SelectableLabel(text, Styles.info,
-			                                GUILayout.ExpandHeight(true), 
-			                                GUILayout.ExpandWidth(true), 
-			                                GUILayout.MinWidth(resultTextSize.x), 
-			                                GUILayout.MinHeight(resultTextSize.y));
-			
-			EditorGUILayout.EndScrollView();
+            EditorGUILayout.EndScrollView();
         }
         
         private void ToggleRunOnRecompilation()
         {
             m_Settings.runOnRecompilation = !m_Settings.runOnRecompilation;
+            EnableBackgroundRunner(m_Settings.runOnRecompilation);
         }
         
         public void AddItemsToMenu (GenericMenu menu)
@@ -199,14 +184,6 @@ namespace UnityTest
             else
                 menu.AddItem(m_GUIAutoSaveSceneBeforeRun, m_Settings.autoSaveSceneBeforeRun, m_Settings.ToggleAutoSaveSceneBeforeRun);
             menu.AddItem(m_GUIShowDetailsBelowTests, m_Settings.horizontalSplit, m_Settings.ToggleHorizontalSplit);
-            menu.AddSeparator("");
-            menu.AddItem(m_GUIReloadTestData, false, ReloadTestList);
-        }
-
-        private void ReloadTestList()
-        {
-            k_TestEngine = new NUnitTestEngine();
-            RefreshTests();
         }
 
         private void RefreshTests()
